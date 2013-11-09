@@ -2,6 +2,8 @@ $(document).ready(function(){
 	var container = $('#gammon-main'),
 		boardModel,
 		boardView,
+		turn,
+		rolled,
 		NUM_SLOTS = 24;
 
 /* random helper stuff */
@@ -56,6 +58,8 @@ $(document).ready(function(){
 
 	/* game logic */
 	function newGame(){
+		turn = 0;
+		rolled = false;
 		boardView = createBoardView();
 		boardModel = createBoardModel();
 		startingPieces();
@@ -66,6 +70,10 @@ $(document).ready(function(){
 		var dice = roleDice();
 		container.find('.die1').html(dice[0]);
 		container.find('.die2').html(dice[1]);
+	}
+
+	function endTurn(){
+
 	}
 
 	function getSpot(slotIndex, spotIndex){
@@ -121,7 +129,7 @@ $(document).ready(function(){
 	}
 
 	function startingPieces(){
-		var startingLocations = [[0,2], [11,5], [15,3], [17,5]],
+		var startingLocations = [[0,2], [11,5], [16,3], [18,5]],
 			s,
 			i,
 			j,
@@ -135,7 +143,6 @@ $(document).ready(function(){
 			}
 		}
 	}
-
 	newGame();
 
 });
