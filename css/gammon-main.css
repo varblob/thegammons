@@ -13,28 +13,37 @@ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abb
 }
 
 .background{
-	height: 340px;
+	height: 600px;
 	width: 100%;
-	background: green;
 }
 
 .forground{
 	position: relative;
-	top: -340px;
+	top: -600px;
 }
 
 .slot{
-	width: 4.16666667%;
-	height: 200px;
-	margin-top: 140px;
+	width: 3.8461538462%;
+	height: 600px;
 	background: red;
 	float: left;
 	outline: 1px solid yellow;
 }
 
+.exit{
+	background: gray;
+}
+
+.highlighted{
+	background: yellow;
+}
+
 .slot .spot{
-	outline: 1px solid purple;
-	height: 20%;
+	height: 6.6666667%;
+}
+
+.selected .piece{
+	outline: 1px solid green;
 }
 
 .slot .spot .piece{
@@ -48,4 +57,13 @@ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abb
 
 .slot .spot .p2{
 	background: black;
+}
+
+.top-bar{
+	height: 40px;
+	text-align: center;
+}
+
+.top-bar .die{
+	display: inline-block;
 }

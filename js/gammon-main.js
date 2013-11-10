@@ -1,12 +1,19 @@
+/* todo */
+
 $(document).ready(function(){
 	var container = $('#gammon-main'),
 		boardModel,
 		boardView,
 		turn,
 		rolled,
-		NUM_SLOTS = 24;
+		dice,
+		currentlySelected,
+		highlighted,
+		NUM_SLOTS = 24,
+		NUM_SPOTS = 15;
 
 /* random helper stuff */
+
 	function random(start, end){
 		return Math.floor(start + Math.random() * (end - start + 1));
 	}
@@ -23,11 +30,11 @@ $(document).ready(function(){
 
 	function createBoardView(){
 		var boardView = $($('#template-gammon-main').html()),
-			forground = boardView.find('.forground');
+			forground = boardView.find('.board');
 
 		function createSlot(){
 			var slot = $('<div class="slot"></div>');
-			for(var i = 0; i < 5; i++){
+			for(var i = 0; i < NUM_SPOTS; i++){
 				slot.append('<div class="spot"></div>');
 			}
 			return slot;
@@ -56,29 +63,37 @@ $(document).ready(function(){
 		return piece;
 	}
 
-	/* game logic */
-	function newGame(){
-		turn = 0;
-		rolled = false;
-		boardView = createBoardView();
-		boardModel = createBoardModel();
-		startingPieces();
-		$(container.find('.roll')).click(roll);
+/* event handlers */
+
+	function slotClickHandler(e){
+		var index = boardView.find('.slot').index(e.currentTarget),
+			moves,
+			slot = getPieceModel(index),
+			player = getCurrentPlayer();
+		if(rolled && player === slot){
+			moves = getMoves(index, dice);
+			selectPiece(index);
+			highlightMoves(moves);
+		}
 	}
 
-	function roll(){
-		var dice = roleDice();
-		container.find('.die1').html(dice[0]);
-		container.find('.die2').html(dice[1]);
+	function rollClickHandler(e){
+		if(!rolled){
+			rolled = true;
+			dice = roleDice();
+			container.find('.die1').html(dice[0]);
+			container.find('.die2').html(dice[1]);
+		}
 	}
 
-	function endTurn(){
-
-	}
+/* view access */
 
 	function getSpot(slotIndex, spotIndex){
+		if(spotIndex === undefined){
+			spotIndex = getSlotModel(slotIndex).length - 1;
+		}
 		return $(getSlot(slotIndex)
-			.find('.spot:eq(' + (4 - spotIndex) + ')')
+			.find('.spot:eq(' + ((NUM_SPOTS - 1) - spotIndex) + ')')
 			.get(0));
 	}
 
@@ -88,8 +103,117 @@ $(document).ready(function(){
 			.get(0));
 	}
 
+	function getPiece(slotIndex){
+		return getSpot(slotIndex);
+	}
+
+/* view helpers */
+
+	function highlightMoves(moves){
+		if(highlighted !== null){
+			unhighlightMoves(highlighted);
+		}
+		for(var i = 0; i < moves.length; i++){
+			if(indexExitsBoard(moves[i])){
+				getExitSlot(getCurrentPlayer()).toggleClass('highlighted', true);
+			} else {
+				getSlot(moves[i]).toggleClass('highlighted', true);
+			}
+		}
+		highlighted = moves;
+	}
+
+	function unhighlightMoves(moves){
+		for(var i =0; i < moves.length; i++){
+			if(indexExitsBoard(moves[i])){
+				getExitSlot(getCurrentPlayer()).toggleClass('highlighted', false);
+			} else {
+				getSlot(moves[i]).toggleClass('highlighted', false);
+			}
+		}
+	}
+
+	function getExitSlot(player){
+		return container.find('.exit.' + player);
+	}
+
+/* model access */
+
+	function getPieceModel(slotIndex){
+		var slot = getSlotModel(slotIndex);
+		return slot[slot.length - 1];
+	}
+
 	function getSlotModel(slotIndex){
 		return boardModel[slotIndex];
+	}
+
+	function getCurrentPlayer(){
+		return 'p' + ((turn % 2) + 1);
+	}
+/* model helpers */
+	function indexExitsBoard(index){
+		return index >= NUM_SLOTS || index < 0;
+	}
+
+/* game logic */
+	function newGame(){
+		turn = 0;
+		rolled = false;
+		currentlySelected = null;
+		highlighted = null;
+		boardView = createBoardView();
+		boardModel = createBoardModel();
+		startingPieces();
+		addListeners();
+	}
+
+	function addListeners(){
+		container.find('.roll').click(rollClickHandler);
+		container.find('.slot').click(slotClickHandler);
+	}
+
+	function endTurn(){
+		rolled = false;
+		unselectPiece(currentlySelected);
+		turn += 1;
+		dice = null;
+		highlighted = null;
+	}
+
+	function getMoves(index, rolls){
+		var possibleMoves = [rolls[0] + index, rolls[1] + index, rolls[0] + rolls[1] + index],
+			slot,
+			i,
+			enemyPiece,
+			moves = [],
+			move;
+
+		function playerCanExit(){
+			var player = getCurrentPlayer();
+			return true;
+		}
+		if(rolls[0] == rolls[1]){
+			possibleMoves = [rolls[0] + index, rolls[0] * 2 + index, rolls[0] * 3 + index, rolls[0] * 4 + index];
+		}
+		for(i = 0; i < possibleMoves.length; i++){
+			move = possibleMoves[i];
+			slot = getSlotModel(move) || [];
+			pieceCount = slot.length;
+			if(indexExitsBoard(move)){
+				if(playerCanExit()){
+					moves.push(move);
+				}
+			} else if(pieceCount === 0 ){
+				moves.push(move);
+			} else {
+				enemyPiece = (slot[0] !== getCurrentPlayer());
+				if(pieceCount === 1 && enemyPiece){
+					moves.push(move);
+				}
+			}
+		}
+		return moves;
 	}
 
 	function playerIndex(index, player){
@@ -121,11 +245,26 @@ $(document).ready(function(){
 
 	function _removePiece(index){
 		var slotModel = getSlotModel(index);
-		getSpot(index, slotModel.length - 1).html('');
+		slotModel.pop();
+		return getPiece(index).html('');
 	}
 
-	function movePiece(slotIndex1, slotIndex2){
+	function selectPiece(slotIndex){
+		if(currentlySelected !== null){
+			unselectPiece(currentlySelected);
+		}
+		currentlySelected = slotIndex;
+		getPiece(slotIndex).toggleClass('selected', true);
+	}
+
+	function unselectPiece(slotIndex){
+		getPiece(slotIndex).toggleClass('selected', false);
+		currentlySelected = null;
+	}
+
+	function movePiece(player, slotIndex1, slotIndex2){
 		// removePiece
+		// place piece
 	}
 
 	function startingPieces(){
