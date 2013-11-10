@@ -46,7 +46,6 @@ $(document).ready(function(){
 		}
 
 		container.html(boardView);
-		addSpots(container.find('.pergatory .chamber'));
 		for(var i = 0; i < NUM_SLOTS; i++){
 			forground.append(createSlot());
 		}
@@ -242,12 +241,16 @@ $(document).ready(function(){
 		return 'p' + ((turn % 2) + 1);
 	}
 
+	function getOtherPlayer(){
+		return 'p' + (((turn+1) % 2) + 1);
+	}
+
 /* model helpers */
 
 	function enemySlot(index){
 		var player = getCurrentPlayer(),
 			slotModel = getSlotModel(index);
-		return (slotModel.length > 0 && slotModel[0] === player);
+		return (slotModel.length === 1 && slotModel[0] !== player);
 	}
 
 	function indexExitsBoard(index){
@@ -323,6 +326,7 @@ $(document).ready(function(){
 		boardModel = createBoardModel();
 		startingPieces();
 		addListeners();
+
 	}
 
 	function addListeners(){
@@ -449,12 +453,10 @@ $(document).ready(function(){
 		}
 	}
 
-	function sendToPergatory(index, player){
-		if(!player){
-			player = getCurrentPlayer();
-		}
-		removePiece(index, player);
-		$('.pergatory.' + player).append(createPieceView(player));
+	function sendToPergatory(index){
+		_removePiece(index);
+		var enemy = getOtherPlayer();
+		$('.pergatory .' + enemy).append(createPieceView(enemy));
 	}
 	newGame();
 

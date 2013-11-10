@@ -80,12 +80,17 @@ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abb
 }
 
 .pergatory{
-	margin-top: 83px;
+	margin: 32px 18px 32px 16px;
 }
 
 .pergatory .chamber{
-	height: 50px;
+	height: 40px;
 	outline: 1px solid black;
-	width: 50%;
+	width: 500px;
+	margin: 0 18.5px;
 	float: left;
+}
+
+.chamber .piece{
+	display: inline-block;
 }
