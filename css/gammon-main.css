@@ -3,47 +3,58 @@ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abb
 
 /* app css */
 
+.clear{
+	clear: both;
+}
 #wrapper{
 	width: 100%;
 	text-align: center;
 }
 #content{
-	width: 1024px;
+	width: 1109.333333334px;
 	margin: 0 auto;
 }
 
 .background{
-	height: 600px;
+	height: 683px;
 	width: 100%;
+	background: transparent url('../images/Gammon_BG.png') no-repeat center;
 }
 
 .forground{
 	position: relative;
-	top: -600px;
+	top: -683px;
 }
 
 .slot{
 	width: 3.8461538462%;
 	height: 600px;
-	background: red;
+	/*background: red;*/
 	float: left;
-	outline: 1px solid yellow;
 }
 
-.exit{
-	background: gray;
+.exit.highlighted{
+	background: yellow;
 }
 
 .highlighted{
-	background: yellow;
+
+}
+
+.slot .slot-highlight{
+	margin: -127px 0 0 -21px;
 }
 
 .slot .spot{
 	height: 6.6666667%;
 }
 
+.piece .highlight{
+	margin: -65px 0 0 -20px;
+}
+
 .selected .piece{
-	outline: 1px solid green;
+
 }
 
 .slot .spot .piece{
@@ -52,11 +63,11 @@ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abb
 }
 
 .slot .spot .p1{
-	background: white;
+	/*background: transparent url('../images/Black_tile_1.png');*/
 }
 
 .slot .spot .p2{
-	background: black;
+	/*background: transparent url('../images/White_tile_1.png');*/
 }
 
 .top-bar{
@@ -66,4 +77,15 @@ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abb
 
 .top-bar .die{
 	display: inline-block;
+}
+
+.pergatory{
+	margin-top: 83px;
+}
+
+.pergatory .chamber{
+	height: 50px;
+	outline: 1px solid black;
+	width: 50%;
+	float: left;
 }
