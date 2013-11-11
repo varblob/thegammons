@@ -20,11 +20,16 @@ $(document).ready(function(){
 	}
 
 	function rollDie(){
-		return 1;//random(1,6);
+		return random(1,6);
 	}
 
 	function rollDice(){
+		playSound('roll');
 		return [rollDie(), rollDie()];
+	}
+
+	function playSound(sound){
+		$('#sfx_' + sound).get(0).play();
 	}
 
 /* view creators */
@@ -35,7 +40,7 @@ $(document).ready(function(){
 
 		function addSpots(div){
 			for(var i = 0; i < NUM_SPOTS; i++){
-				div.append('<div class="spot"></div>');
+				div.append($('<div class="spot"></div>').css('z-index', NUM_SPOTS - i));
 			}
 		}
 
@@ -64,7 +69,7 @@ $(document).ready(function(){
 		var piece = $($('#template-piece').html());
 		if(player){
 			piece.toggleClass(player, true);
-			piece.append('<img src="images/' + player + '_tile_' + random(1,3) + '.png" />');
+			piece.append('<img src="images/' + player + '_tile_' + random(1,4) + '.png" />');
 		}
 		return piece;
 	}
@@ -87,7 +92,7 @@ $(document).ready(function(){
 			index = boardView.find('.slot').index(currentTarget);
 		}
 		if(rolled){
-			if(highlighted && highlighted.indexOf(index) !== -1){
+			if(highlighted && (highlighted.indexOf(index) !== -1 || indexExitsBoard(index))){
 				unhighlightMoves();
 				distance = index - currentlySelected;
 				if(enemySlot(index)){
@@ -101,6 +106,19 @@ $(document).ready(function(){
 					endTurn();
 				}
 			} else if (player === getPieceModel(index)){
+				moves = getMoves(index, dice);
+				selectPiece(index);
+				highlightMoves(moves);
+			}
+		}
+	}
+
+	function pergatoryClickHandler(e){
+		var player = getCurrentPlayer(),
+			index = player === 'p1' ? -1 : NUM_SLOTS,
+			currentTarget = $(e.currentTarget);
+		if(currentTarget.hasClass(player)){
+			if(rolled){
 				moves = getMoves(index, dice);
 				selectPiece(index);
 				highlightMoves(moves);
@@ -126,12 +144,18 @@ $(document).ready(function(){
 /* view access */
 
 	function getSpot(slotIndex, spotIndex){
-		if(spotIndex === undefined){
-			spotIndex = getSlotModel(slotIndex).length - 1;
+		if(slotIndex === -1){
+			return $($('.chamber.p1 .piece').get(0));
+		} else if (slotIndex === NUM_SLOTS){
+			return $($('.chamber.p2 .piece').get(0));
+		} else {
+			if(spotIndex === undefined){
+				spotIndex = getSlotModel(slotIndex).length - 1;
+			}
+			return $(getSlot(slotIndex)
+				.find('.spot:eq(' + ((NUM_SPOTS - 1) - spotIndex) + ')')
+				.get(0));
 		}
-		return $(getSlot(slotIndex)
-			.find('.spot:eq(' + ((NUM_SPOTS - 1) - spotIndex) + ')')
-			.get(0));
 	}
 
 	function getSlot(slotIndex){
@@ -206,7 +230,6 @@ $(document).ready(function(){
 		piece = getPiece(slotIndex);
 		if(!piece.hasClass('selected')){
 			piece.toggleClass('selected', true)
-			.css('z-index',10000)
 			.find('.piece')
 			.append('<img class="highlight" src="images/' + getCurrentPlayer() + '_tile_selection.png" />');
 		}
@@ -219,7 +242,6 @@ $(document).ready(function(){
 		}
 		if(slotIndex !== null){
 			getPiece(slotIndex).toggleClass('selected', false)
-				.css('z-index',1)
 				.find('.highlight')
 				.remove();
 			currentlySelected = null;
@@ -248,9 +270,12 @@ $(document).ready(function(){
 /* model helpers */
 
 	function enemySlot(index){
-		var player = getCurrentPlayer(),
-			slotModel = getSlotModel(index);
-		return (slotModel.length === 1 && slotModel[0] !== player);
+		if(!indexExitsBoard(index)){
+			var player = getCurrentPlayer(),
+				slotModel = getSlotModel(index);
+			return (slotModel.length === 1 && slotModel[0] !== player);
+		}
+		return false;
 	}
 
 	function indexExitsBoard(index){
@@ -326,12 +351,13 @@ $(document).ready(function(){
 		boardModel = createBoardModel();
 		startingPieces();
 		addListeners();
-
+		rollClickHandler();
 	}
 
 	function addListeners(){
 		container.find('.roll').click(rollClickHandler);
 		container.find('.slot').click(slotClickHandler);
+		container.find('.chamber').click(pergatoryClickHandler);
 	}
 
 	function endTurn(){
@@ -340,6 +366,7 @@ $(document).ready(function(){
 		turn += 1;
 		dice = null;
 		highlighted = null;
+		rollClickHandler();
 		console.log('end turn');
 	}
 
@@ -403,6 +430,7 @@ $(document).ready(function(){
 			slotModel.push(player);
 			piece = getSpot(index, slotModel.length - 1)
 				.html(createPieceView(player));
+			playSound('place');
 
 		}
 		return piece;
@@ -425,7 +453,8 @@ $(document).ready(function(){
 	function _removePiece(index){
 		var slotModel = getSlotModel(index),
 			piece = getPiece(index).html('');
-		slotModel.pop();
+		if(slotModel)
+			slotModel.pop();
 		return piece;
 	}
 
@@ -438,7 +467,7 @@ $(document).ready(function(){
 	}
 
 	function startingPieces(){
-		var startingLocations = [[0,15], [11,1], [16,1], [18,1]],//[[0,2], [11,5], [16,3], [18,5]],
+		var startingLocations = [[0,2], [11,5], [16,3], [18,5]],
 			s,
 			i,
 			j,
@@ -455,9 +484,10 @@ $(document).ready(function(){
 
 	function sendToPergatory(index){
 		_removePiece(index);
+		console.log('send to pergatory ' + index);
 		var enemy = getOtherPlayer();
-		$('.pergatory .' + enemy).append(createPieceView(enemy));
+		$('.pergatory .chamber.' + enemy).append(createPieceView(enemy));
 	}
+	playSound('music');
 	newGame();
-
 });

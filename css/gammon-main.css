@@ -18,16 +18,18 @@ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abb
 .background{
 	height: 683px;
 	width: 100%;
+	margin: -9px 4px;
 	background: transparent url('../images/Gammon_BG.png') no-repeat center;
 }
 
 .forground{
 	position: relative;
 	top: -683px;
+	width: 102%;
 }
 
 .slot{
-	width: 3.8461538462%;
+	width: 43px;
 	height: 600px;
 	/*background: red;*/
 	float: left;
@@ -42,11 +44,12 @@ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abb
 }
 
 .slot .slot-highlight{
-	margin: -127px 0 0 -21px;
+	margin: -120px 0 0 -21px;
 }
 
 .slot .spot{
 	height: 6.6666667%;
+	position: relative;
 }
 
 .piece .highlight{
@@ -79,18 +82,33 @@ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abb
 	display: inline-block;
 }
 
+.outcome{
+	display: none;
+}
+
+button.roll{
+	display: none;
+}
+
 .pergatory{
-	margin: 32px 18px 32px 16px;
+	margin: 37px 12px 32px 13px;
 }
 
 .pergatory .chamber{
 	height: 40px;
-	outline: 1px solid black;
+	/*outline: 1px solid black;*/
 	width: 500px;
-	margin: 0 18.5px;
+	margin: 0 19.5px;
 	float: left;
 }
 
 .chamber .piece{
 	display: inline-block;
 }
+
+.moves .die{
+	font-family: Verdana;
+	font-size:200px;
+	margin: 30px 10px;
+}
+
