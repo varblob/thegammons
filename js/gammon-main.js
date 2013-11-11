@@ -95,7 +95,7 @@ $(document).ready(function(){
 			if(highlighted && (highlighted.indexOf(index) !== -1 || indexExitsBoard(index))){
 				unhighlightMoves();
 				distance = index - currentlySelected;
-				if(enemySlot(index)){
+				if(enemySlot(index) && piecesOnSlot(index) === 1){
 					sendToPergatory(index, player);
 				}
 				movePiece(currentlySelected, index);
@@ -273,9 +273,13 @@ $(document).ready(function(){
 		if(!indexExitsBoard(index)){
 			var player = getCurrentPlayer(),
 				slotModel = getSlotModel(index);
-			return (slotModel.length === 1 && slotModel[0] !== player);
+			return (slotModel.length > 0 && slotModel[0] !== player);
 		}
 		return false;
+	}
+
+	function piecesOnSlot(index){
+		return getSlotModel(index).length;
 	}
 
 	function indexExitsBoard(index){
@@ -374,7 +378,6 @@ $(document).ready(function(){
 		var possibleMoves = [],
 			slot,
 			i,
-			enemyPiece,
 			moves = [],
 			move,
 			player = getCurrentPlayer();
@@ -403,15 +406,15 @@ $(document).ready(function(){
 			move = possibleMoves[i];
 			slot = getSlotModel(move) || [];
 			pieceCount = slot.length;
+			enemy = enemySlot(move);
 			if(indexExitsBoard(move)){
 				if(playerCanExit()){
 					moves.push(move);
 				}
-			} else if(pieceCount === 0 ){
+			} else if(pieceCount === 0 || !enemy){
 				moves.push(move);
 			} else {
-				enemyPiece = (slot[0] !== getCurrentPlayer());
-				if(pieceCount === 1 && enemyPiece){
+				if(pieceCount === 1 && enemy){
 					moves.push(move);
 				}
 			}
