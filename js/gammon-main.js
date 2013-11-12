@@ -107,8 +107,12 @@ $(document).ready(function(){
 				}
 			} else if (player === getPieceModel(index)){
 				moves = getMoves(index, dice);
-				selectPiece(index);
-				highlightMoves(moves);
+				if(moves.length === 0){
+					endTurn();
+				}else{
+					selectPiece(index);
+					highlightMoves(moves);
+				}
 			}
 		}
 	}
@@ -269,6 +273,29 @@ $(document).ready(function(){
 
 /* model helpers */
 
+	function numInPergatory(){
+		return $('.pergatory .chamber.' + getCurrentPlayer() + ' .piece').length;
+	}
+
+	function numInEndZone(){
+		var i,
+			p2 = isP1() ? 0 : NUM_SLOTS - 6 - 1,
+			count = 0,
+			slot,
+			player = getCurrentPlayer();
+		for(i = 0 + p2; i < 6 + p2; i++){
+			slot = getSlotModel(i);
+			if(slot[0] === player){
+				count += slot.length;
+			}
+		}
+		return count;
+	}
+
+	function isP1(){
+		return (turn % 2);
+	}
+
 	function enemySlot(index){
 		if(!indexExitsBoard(index)){
 			var player = getCurrentPlayer(),
@@ -383,7 +410,8 @@ $(document).ready(function(){
 			player = getCurrentPlayer();
 
 		function playerCanExit(){
-			return true;
+			console.log('num in end zone:' + numInEndZone());
+			return numInEndZone() === 15;
 		}
 
 		function pn(delta){
@@ -393,13 +421,15 @@ $(document).ready(function(){
 			return delta;
 		}
 		if(rolledDouble(rolls)){
-			for(i = 1; i <= rolls.length; i++){
-				possibleMoves.push(pn(rolls[0] * i) + index);
-			}
+			possibleMoves.push(pn(rolls[0]) + index);
+			// for(i = 1; i <= rolls.length; i++){
+					// possibleMoves.push(pn(rolls[0] * i) + index);
+			// }
 		} else {
 			possibleMoves.push(pn(rolls[0]) + index);
 			if(rolls.length > 1){
-				possibleMoves.push(pn(rolls[1]) + index, pn(rolls[0] + rolls[1]) + index);
+				possibleMoves.push(pn(rolls[1]) + index);
+				// pn(rolls[0] + rolls[1]) + index
 			}
 		}
 		for(i = 0; i < possibleMoves.length; i++){
@@ -458,6 +488,8 @@ $(document).ready(function(){
 			piece = getPiece(index).html('');
 		if(slotModel)
 			slotModel.pop();
+		else
+			$('.pergatory .chamber.' + getOtherPlayer() + ' .piece:eq(0)').remove();
 		return piece;
 	}
 
@@ -491,6 +523,8 @@ $(document).ready(function(){
 		var enemy = getOtherPlayer();
 		$('.pergatory .chamber.' + enemy).append(createPieceView(enemy));
 	}
+
+	/* game logic helpers */
 	playSound('music');
 	newGame();
 });
